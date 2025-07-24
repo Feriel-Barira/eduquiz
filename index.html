@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>EduQuiz - Interactive Learning</title>
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --secondary-color: #3a0ca3;
+        --accent-color: #f72585;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --success-color: #4cc9f0;
+        --warning-color: #f8961e;
+        --danger-color: #ef233c;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f7fa;
+        color: var(--dark-color);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+      }
+
+      .logo {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+      }
+
+      .tagline {
+        color: #6c757d;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .quiz-container {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        min-height: 400px;
+      }
+
+      .question-container {
+        margin-bottom: 1.5rem;
+      }
+
+      .progress-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .progress-bar {
+        flex-grow: 1;
+        height: 10px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        margin-right: 1rem;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        background-color: var(--primary-color);
+        transition: var(--transition);
+      }
+
+      .timer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .timer-icon {
+        color: var(--warning-color);
+      }
+
+      .question-count {
+        color: #6c757d;
+        margin-bottom: 1rem;
+      }
+
+      .question-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+      }
+
+      .options-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .option {
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+      }
+
+      .option:hover {
+        background-color: #f8f9fa;
+        border-color: var(--primary-color);
+      }
+
+      .option input {
+        margin-right: 1rem;
+      }
+
+      .option-label {
+        width: 100%;
+      }
+
+      .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--secondary-color);
+      }
+
+      .btn-secondary {
+        background-color: #e9ecef;
+        color: var(--dark-color);
+      }
+
+      .btn-secondary:hover {
+        background-color: #dee2e6;
+      }
+
+      .btn-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .result-container {
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .result-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+      }
+
+      .score {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 1rem 0;
+        color: var(--accent-color);
+      }
+
+      .congrats {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .feedback {
+        margin-bottom: 2rem;
+      }
+
+      .restart-btn {
+        margin-top: 2rem;
+      }
+
+      .confetti {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .quiz-container {
+          padding: 1.5rem;
+        }
+
+        .question-text {
+          font-size: 1.1rem;
+        }
+      }
+
+      /* Animation */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+
+      /* Selected option style */
+      .option.selected {
+        border-color: var(--primary-color);
+        background-color: rgba(67, 97, 238, 0.1);
+      }
+
+      /* Correct answer style */
+      .option.correct {
+        border-color: var(--success-color);
+        background-color: rgba(76, 201, 240, 0.1);
+      }
+
+      /* Wrong answer style */
+      .option.wrong {
+        border-color: var(--danger-color);
+        background-color: rgba(239, 35, 60, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      // Sample quiz data
+      const quizData = [
+        {
+          question:
+            "Which programming language is primarily used for building interactive web interfaces?",
+          options: ["Python", "Java", "JavaScript", "C++"],
+          answer: "JavaScript",
+          explanation:
+            "JavaScript is the programming language of the web, enabling interactive elements on websites.",
+        },
+        {
+          question: "What does CSS stand for in web development?",
+          options: [
+            "Computer Style Sheets",
+            "Creative Style Sheets",
+            "Cascading Style Sheets",
+            "Colorful Style Sheets",
+          ],
+          answer: "Cascading Style Sheets",
+          explanation:
+            "CSS stands for Cascading Style Sheets, which controls the presentation of HTML elements.",
+        },
+        {
+          question: "Which of these is NOT a React Hook?",
+          options: ["useState", "useEffect", "useContext", "useFunction"],
+          answer: "useFunction",
+          explanation:
+            "useFunction is not a standard React Hook. The other options are all built-in React Hooks.",
+        },
+        {
+          question: "What is the purpose of the virtual DOM in React?",
+          options: [
+            "To create 3D graphics",
+            "To improve performance by minimizing direct DOM manipulation",
+            "To handle virtual reality applications",
+            "To store data permanently",
+          ],
+          answer:
+            "To improve performance by minimizing direct DOM manipulation",
+          explanation:
+            "React's virtual DOM is a lightweight copy of the real DOM, allowing efficient updates and rendering.",
+        },
+        {
+          question:
+            "Which method would you use to update state in a functional component?",
+          options: [
+            "this.setState()",
+            "The useState hook",
+            "The setState method",
+            "The updateState function",
+          ],
+          answer: "The useState hook",
+          explanation:
+            "Functional components use the useState hook to manage state, while class components use this.setState().",
+        },
+      ];
+      const Confetti = () => {
+        return (
+          <div className="confetti">
+            {[...Array(100)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  width: "10px",
+                  height: "10px",
+                  backgroundColor: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                  top: `${Math.random() * 100}%`,
+                  left: `${Math.random() * 100}%`,
+                  opacity: 0.7,
+                  transform: `rotate(${Math.random() * 360}deg)`,
+                  animation: `fall ${Math.random() * 3 + 2}s linear infinite`,
+                }}
+              />
+            ))}
+            <style>{`
+            @keyframes fall {
+              to { transform: translateY(100vh) rotate(360deg); }
+            }
+          `}</style>
+          </div>
+        );
+      };
+
+      // Question component
+      const Question = ({
+        question,
+        options,
+        selectedOption,
+        onSelect,
+        showResults,
+      }) => {
+        return (
+          <div className="fade-in">
+            <h3 className="question-text">{question}</h3>
+            <div className="options-container">
+              {options.map((option, index) => {
+                let optionClass = "option";
+                if (showResults) {
+                  if (option === question.answer) {
+                    optionClass += " correct";
+                  } else if (
+                    option === selectedOption &&
+                    option !== question.answer
+                  ) {
+                    optionClass += " wrong";
+                  }
+                } else if (option === selectedOption) {
+                  optionClass += " selected";
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className={optionClass}
+                    onClick={() => !showResults && onSelect(option)}
+                  >
+                    <div className="option-label">
+                      <span>{String.fromCharCode(65 + index)}. </span>
+                      {option}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      };
+
+      // Results component
+      const Result = ({ score, totalQuestions, onRestart }) => {
+        const percentage = Math.round((score / totalQuestions) * 100);
+        let feedback = "";
+
+        if (percentage >= 80) {
+          feedback = "Excellent work! You really know your stuff!";
+        } else if (percentage >= 60) {
+          feedback = "Good job! You have a solid understanding.";
+        } else if (percentage >= 40) {
+          feedback = "Keep practicing! You're getting there.";
+        } else {
+          feedback = "Don't worry! Review the material and try again.";
+        }
+
+        return (
+          <div className="result-container fade-in">
+            <h2 className="result-title">Quiz Completed!</h2>
+            <div className="score">
+              {score}/{totalQuestions}
+            </div>
+            <p className="congrats">{feedback}</p>
+            <button className="btn btn-primary restart-btn" onClick={onRestart}>
+              Restart Quiz
+            </button>
+            {percentage >= 80 && <Confetti />}
+          </div>
+        );
+      };
+
+      // Main Quiz component
+      const Quiz = () => {
+        const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+        const [score, setScore] = useState(0);
+        const [selectedOption, setSelectedOption] = useState(null);
+        const [showResults, setShowResults] = useState(false);
+        const [timeLeft, setTimeLeft] = useState(30);
+        const [quizStarted, setQuizStarted] = useState(false);
+        const [isAnswerSelected, setIsAnswerSelected] = useState(false);
+
+        useEffect(() => {
+          // Reset timer when question changes
+          setTimeLeft(30);
+        }, [currentQuestionIndex]);
+
+        const currentQuestion = quizData[currentQuestionIndex];
+        const totalQuestions = quizData.length;
+
+        // Timer logic
+        useEffect(() => {
+          if (!quizStarted || showResults) return;
+
+          const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+              if (prev <= 1) {
+                clearInterval(timer);
+                handleNextQuestion();
+                return 30;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+
+          return () => clearInterval(timer);
+        }, [quizStarted, showResults, currentQuestionIndex]);
+
+        const handleOptionSelect = (option) => {
+          setSelectedOption(option);
+          setIsAnswerSelected(true);
+        };
+
+        const handleNextQuestion = () => {
+          // Check if answer is correct
+          if (selectedOption === currentQuestion.answer) {
+            setScore(score + 1);
+          }
+
+          // Move to next question or end quiz
+          if (currentQuestionIndex < totalQuestions - 1) {
+            setCurrentQuestionIndex(currentQuestionIndex + 1);
+            setSelectedOption(null);
+            setTimeLeft(30);
+            setIsAnswerSelected(false);
+          } else {
+            setShowResults(true);
+          }
+        };
+
+        const restartQuiz = () => {
+          setCurrentQuestionIndex(0);
+          setScore(0);
+          setSelectedOption(null);
+          setShowResults(false);
+          setTimeLeft(30);
+          setQuizStarted(false);
+          setIsAnswerSelected(false);
+        };
+
+        const startQuiz = () => {
+          setQuizStarted(true);
+        };
+
+        if (!quizStarted) {
+          return (
+            <div
+              className="quiz-container fade-in"
+              style={{ textAlign: "center" }}
+            >
+              <h2>Welcome to EduQuiz!</h2>
+              <p>
+                Test your knowledge with {totalQuestions} questions about web
+                development.
+              </p>
+              <p>You'll have 30 seconds per question.</p>
+              <button
+                className="btn btn-primary"
+                onClick={startQuiz}
+                style={{ display: "inline-block", marginTop: "20px" }}
+              >
+                Start Quiz
+              </button>
+            </div>
+          );
+        }
+
+        if (showResults) {
+          return (
+            <React.Fragment>
+              <div className="quiz-container">
+                <Result
+                  score={score}
+                  totalQuestions={totalQuestions}
+                  onRestart={restartQuiz}
+                />
+              </div>
+            </React.Fragment>
+          );
+        }
+
+        return (
+          <div className="quiz-container fade-in">
+            <div className="progress-container">
+              <div className="progress-bar">
+                <div
+                  className="progress"
+                  style={{
+                    width: `${(currentQuestionIndex / totalQuestions) * 100}%`,
+                  }}
+                ></div>
+              </div>
+              <div className="timer">
+                <span className="timer-icon">⏱️</span>
+                <span>{timeLeft}s</span>
+              </div>
+            </div>
+
+            <p className="question-count">
+              Question {currentQuestionIndex + 1} of {totalQuestions}
+            </p>
+
+            <div className="question-container">
+              <Question
+                question={currentQuestion.question}
+                options={currentQuestion.options}
+                selectedOption={selectedOption}
+                onSelect={handleOptionSelect}
+                showResults={false}
+                key={currentQuestionIndex}
+              />
+            </div>
+
+            <div className="navigation">
+              <button
+                className={`btn ${
+                  isAnswerSelected
+                    ? "btn-primary"
+                    : "btn-secondary btn-disabled"
+                }`}
+                onClick={handleNextQuestion}
+                disabled={!isAnswerSelected}
+              >
+                {currentQuestionIndex === totalQuestions - 1
+                  ? "Finish"
+                  : "Next"}
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      // App component
+      const App = () => {
+        return (
+          <div className="container">
+            <header>
+              <div className="logo">
+                <div className="logo-icon">EQ</div>
+                <span>EduQuiz</span>
+              </div>
+              <p className="tagline">
+                Test your knowledge and level up your skills
+              </p>
+            </header>
+            <Quiz />
+          </div>
+        );
+      };
+
+      // Render the app
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
+```
